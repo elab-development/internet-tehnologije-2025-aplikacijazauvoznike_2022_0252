@@ -1,0 +1,1 @@
+ALTER TABLE "product_offer" ALTER COLUMN "code" SET NOT NULL;

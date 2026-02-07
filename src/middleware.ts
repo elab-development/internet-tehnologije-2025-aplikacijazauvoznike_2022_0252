@@ -20,7 +20,7 @@ export async function middleware(req: NextRequest) {
 
   const token = req.cookies.get(AUTH_COOKIE)?.value;
 
-  //  nije ulogovan
+  
   if (!token) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
@@ -28,12 +28,12 @@ export async function middleware(req: NextRequest) {
   try {
     const user = await verifyInMiddleware(token);
 
-    //  ADMIN rute
+    
     if (pathname.startsWith("/admin") && user.role !== "ADMIN") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
-    //  IMPORTER rute
+    
     if (
       pathname.startsWith("/importer") &&
       !["ADMIN", "IMPORTER"].includes(user.role)
@@ -41,7 +41,7 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
-    //  SUPPLIER rute
+    
     if (
       pathname.startsWith("/supplier") &&
       !["ADMIN", "SUPPLIER"].includes(user.role)
@@ -49,10 +49,10 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
-    //  sve dozvoljeno
+    
     return NextResponse.next();
   } catch {
-    //  token ne važi
+    
     return NextResponse.redirect(new URL("/login", req.url));
   }
 }

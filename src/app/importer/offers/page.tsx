@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Sidebar from "@/components/Sidebar";
+import AddToContainerModal from "@/components/AddToContainerModal";
+import { useRouter } from "next/navigation";
 
 type ImporterOfferDto = {
   id: string;
@@ -37,6 +39,14 @@ export default function ImporterOffersPage() {
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
 
+  const router = useRouter();
+
+  const [containers, setContainers] = useState<{ id: string; label: string }[]>([]);
+  const [selectedOffer, setSelectedOffer] = useState<ImporterOfferDto | null>(null);
+
+  const [compareOffers, setCompareOffers] = useState<ImporterOfferDto[]>([]);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
   async function load() {
     setLoading(true);
     setError(null);
@@ -63,10 +73,26 @@ export default function ImporterOffersPage() {
   }
 
   useEffect(() => {
+    async function loadContainers() {
+      try {
+        const res = await fetch("/api/importer/containers?status=DRAFT", {
+          credentials: "include",
+          cache: "no-store",
+        });
+        const data = await res.json().catch(() => null);
+        if (res.ok && Array.isArray(data)) {
+          setContainers(data);
+        }
+      } catch {}
+    }
+
+    loadContainers();
+  }, []);
+
+  useEffect(() => {
     load();
   }, []);
 
-  // Search filter, pre grupisanja
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return offers;
@@ -82,7 +108,6 @@ export default function ImporterOffersPage() {
     });
   }, [offers, query]);
 
-  // Grupisanje po supplier-u
   const grouped = useMemo(() => {
     const map = new Map<
       string,
@@ -101,12 +126,10 @@ export default function ImporterOffersPage() {
       map.get(key)!.items.push(o);
     }
 
-    // sort grupe po imenu supplier-a
     const groups = Array.from(map.values()).sort((a, b) =>
       a.supplierName.localeCompare(b.supplierName)
     );
 
-    // sort ponude unutar grupe po datumu (najnovije prvo)
     for (const g of groups) {
       g.items.sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -116,12 +139,41 @@ export default function ImporterOffersPage() {
     return groups;
   }, [filtered]);
 
+  function toggleCompare(offer: ImporterOfferDto) {
+    setCompareOffers((prev) => {
+      const exists = prev.find((o) => o.id === offer.id);
+
+      if (exists) {
+        const updated = prev.filter((o) => o.id !== offer.id);
+        if (updated.length === 0) setActiveCategory(null);
+        return updated;
+      }
+
+      if (prev.length >= 4) return prev;
+
+      if (prev.length === 0) {
+        setActiveCategory(offer.categoryId);
+        return [offer];
+      }
+
+      if (offer.categoryId !== activeCategory) {
+        alert("You can compare only products from the same category.");
+        return prev;
+      }
+
+      return [...prev, offer];
+    });
+  }
+
+  function goToCompare() {
+    if (compareOffers.length < 2) return;
+    const ids = compareOffers.map((o) => o.id).join(",");
+    router.push(`/importer/compare?ids=${ids}`);
+  }
 
   return (
     <main className="min-h-screen bg-gray-100">
       <div className="md:flex">
-        
-
         <section className="flex-1 p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -131,7 +183,31 @@ export default function ImporterOffersPage() {
               </p>
             </div>
 
-            
+            <div className="flex gap-3">
+              {compareOffers.length >= 2 && (
+                <button
+                  onClick={goToCompare}
+                  className="rounded-xl bg-green-600 px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+                >
+                  Compare ({compareOffers.length})
+                </button>
+              )}
+
+              <button 
+                onClick={() => router.push("/dashboard")}
+                className="
+                  rounded-xl
+                  border border-black
+                  px-4 py-2
+                  text-sm font-medium
+                  text-black
+                  transition
+                  hover:bg-black hover:text-white
+                "
+              >
+                Back to dashboard
+              </button>
+            </div>
           </div>
 
           <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
@@ -206,7 +282,13 @@ export default function ImporterOffersPage() {
 
                   <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                     {g.items.map((o) => (
-                      <OfferCard key={o.id} offer={o} />
+                      <OfferCard
+                        key={o.id}
+                        offer={o}
+                        onAdd={setSelectedOffer}
+                        onCompare={toggleCompare}
+                        isCompared={compareOffers.some(x => x.id === o.id)}
+                      />
                     ))}
                   </div>
                 </div>
@@ -215,11 +297,27 @@ export default function ImporterOffersPage() {
           )}
         </section>
       </div>
+
+      <AddToContainerModal
+        offer={selectedOffer}
+        containers={containers}
+        onClose={() => setSelectedOffer(null)}
+      />
     </main>
   );
 }
 
-function OfferCard({ offer }: { offer: ImporterOfferDto }) {
+function OfferCard({
+  offer,
+  onAdd,
+  onCompare,
+  isCompared,
+}: {
+  offer: ImporterOfferDto;
+  onAdd: (offer: ImporterOfferDto) => void;
+  onCompare: (offer: ImporterOfferDto) => void;
+  isCompared: boolean;
+}) {
   return (
     <div className="rounded-2xl bg-gray-50 p-5 transition hover:shadow-md">
       <div className="flex items-start gap-4">
@@ -275,8 +373,28 @@ function OfferCard({ offer }: { offer: ImporterOfferDto }) {
               </span>
             </div>
 
-            <div className="text-xs text-gray-500">{formatDate(offer.createdAt)}</div>
+            <div className="text-xs text-gray-500">
+              {formatDate(offer.createdAt)}
+            </div>
           </div>
+
+          <button
+            onClick={() => onAdd(offer)}
+            className="mt-3 rounded-xl bg-black px-3 py-2 text-sm text-white hover:opacity-90"
+          >
+            Add to container
+          </button>
+
+          <button
+            onClick={() => onCompare(offer)}
+            className={`mt-2 ml-2 rounded-xl px-3 py-2 text-sm ${
+              isCompared
+                ? "bg-gray-300 text-black"
+                : "bg-blue-600 text-white hover:opacity-90"
+            }`}
+          >
+            {isCompared ? "Selected" : "Compare"}
+          </button>
         </div>
       </div>
     </div>
@@ -298,4 +416,3 @@ function formatPrice(p: string) {
     maximumFractionDigits: 2,
   }).format(n);
 }
-

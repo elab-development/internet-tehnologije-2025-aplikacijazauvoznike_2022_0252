@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import OfferCard, { SupplierOfferDto } from "@/components/OfferCard";
-
+import { useRouter } from "next/navigation";
+import NewOfferModal from "@/components/NewOfferModal";
 
 type Role = "ADMIN" | "IMPORTER" | "SUPPLIER";
 
@@ -12,21 +13,23 @@ export default function SupplierOffersPage() {
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const [showNewModal, setShowNewModal] = useState(false);
+
+  const router = useRouter();
 
   const filtered = useMemo(() => {
-  const q = query.trim().toLowerCase();
-  if (!q) return offers;
+    const q = query.trim().toLowerCase();
+    if (!q) return offers;
 
-  return offers.filter((o) => {
-    return (
-      o.code.toLowerCase().includes(q) ||
-      o.name.toLowerCase().includes(q) ||
-      (o.description ?? "").toLowerCase().includes(q) ||
-      (o.categoryName ?? "").toLowerCase().includes(q)
-    );
-  });
-}, [offers, query]);
-
+    return offers.filter((o) => {
+      return (
+        o.code.toLowerCase().includes(q) ||
+        o.name.toLowerCase().includes(q) ||
+        (o.description ?? "").toLowerCase().includes(q) ||
+        (o.categoryName ?? "").toLowerCase().includes(q)
+      );
+    });
+  }, [offers, query]);
 
   async function load() {
     setLoading(true);
@@ -89,26 +92,59 @@ export default function SupplierOffersPage() {
   return (
     <main className="min-h-screen bg-gray-100">
       <div className="md:flex">
-
         <section className="flex-1 p-6">
           
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">My Offers</h1>
+              <h1 className="text-2xl font-semibold text-gray-900">
+                My Offers
+              </h1>
               <p className="mt-1 text-sm text-gray-600">
                 List of your bids published as a supplier.
               </p>
             </div>
 
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowNewModal(true)}
+                className="
+                  rounded-xl
+                  bg-black
+                  px-4 py-2
+                  text-sm font-medium
+                  text-white
+                  transition
+                  hover:opacity-85
+                "
+              >
+                + New Offer
+              </button>
+
+              <button 
+                onClick={() => router.push("/dashboard")}
+                className="
+                  rounded-xl
+                  border border-black
+                  px-4 py-2
+                  text-sm font-medium
+                  text-black
+                  transition
+                  hover:bg-black hover:text-white
+                "
+              >
+                Back to dashboard
+              </button>
+            </div>
           </div>
 
-          
           <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="text-sm text-gray-600">
                 Total:{" "}
-                <span className="font-medium text-gray-900">{offers.length}</span>
-                {query.trim() ? (
+                <span className="font-medium text-gray-900">
+                  {offers.length}
+                </span>
+                {query.trim() && (
                   <>
                     {" "}
                     | Shown:{" "}
@@ -116,7 +152,7 @@ export default function SupplierOffersPage() {
                       {filtered.length}
                     </span>
                   </>
-                ) : null}
+                )}
               </div>
 
               <input
@@ -136,7 +172,6 @@ export default function SupplierOffersPage() {
             </div>
           </div>
 
-         
           {loading && (
             <div className="mt-4 rounded-2xl bg-white p-5 shadow-sm text-gray-700">
               Loading...
@@ -156,7 +191,6 @@ export default function SupplierOffersPage() {
             </div>
           )}
 
-          
           {!loading && !error && filtered.length > 0 && (
             <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {filtered.map((o) => (
@@ -167,13 +201,16 @@ export default function SupplierOffersPage() {
                   onDelete={() => handleDelete(o.id)}
                 />
               ))}
-
             </div>
           )}
         </section>
       </div>
+
+      <NewOfferModal
+        open={showNewModal}
+        onClose={() => setShowNewModal(false)}
+        onCreated={load}
+      />
     </main>
   );
 }
-
-

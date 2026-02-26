@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import NewOfferModal from "@/components/NewOfferModal";
@@ -23,9 +23,61 @@ export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const [currentDateTime, setCurrentDateTime] = useState<Date | null>(null);
+
+  const offsetRef = useRef<number>(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const [openNewOffer, setOpenNewOffer] = useState(false);
   const [openCollab, setOpenCollab] = useState(false);
 
+  useEffect(() => {
+    async function initTime() {
+      try {
+        const res = await fetch("/api/time", {
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (!res.ok) return;
+
+        const data = await res.json();
+
+        const externalTime = data.externalTime;
+        const serverNow = data.serverNow;
+
+        offsetRef.current = externalTime - serverNow;
+
+        function updateTime() {
+          const now = new Date(Date.now() + offsetRef.current);
+          setCurrentDateTime(now);
+        }
+
+        updateTime();
+
+        const now = new Date(Date.now() + offsetRef.current);
+        const seconds = now.getSeconds();
+        const delay = (60 - seconds) * 1000;
+
+        timeoutRef.current = setTimeout(() => {
+          updateTime();
+          intervalRef.current = setInterval(updateTime, 60000);
+        }, delay);
+      } catch (err) {
+        console.error("Time init failed");
+      }
+    }
+
+    initTime();
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  // AUTH
   useEffect(() => {
     let cancelled = false;
 
@@ -86,16 +138,31 @@ export default function DashboardPage() {
 
   if (!user) return null;
 
-  const displayName = user.companyName?.trim() ? user.companyName : user.email;
+  const displayName = user.companyName?.trim()
+    ? user.companyName
+    : user.email;
+
+  const formattedDate = currentDateTime?.toLocaleDateString("en-GB", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
+  const formattedTime = currentDateTime?.toLocaleTimeString("sr-RS", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
   return (
     <main className="min-h-screen bg-gray-100">
       <div className="md:flex">
-
         <section className="flex-1 p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+              <h1 className="text-2xl font-semibold text-gray-900">
+                Dashboard
+              </h1>
 
               <p className="mt-1 text-sm text-gray-600">
                 You are logged in as{" "}
@@ -117,12 +184,16 @@ export default function DashboardPage() {
               )}
             </div>
 
-            <button
-              onClick={logout}
-              className="rounded-xl bg-black px-4 py-2 text-white hover:bg-gray-800"
-            >
-              Logout
-            </button>
+            <div className="flex flex-col items-end text-right">
+              <div className="text-sm text-gray-500">
+                {formattedDate || "Loading date..."}
+              </div>
+
+              <div className="text-3xl font-semibold text-gray-900 tracking-tight">
+                {formattedTime || "--:--"}
+              </div>
+
+            </div>
           </div>
 
           <div className="mt-6 grid gap-4 md:grid-cols-3">
@@ -155,6 +226,12 @@ export default function DashboardPage() {
                   desc="Overview of offers"
                   href="/importer/offers"
                 />
+
+                <DashboardCard
+                  title="Containers"
+                  desc="Overview of all containers"
+                  href="/importer/containers"
+                />
               </>
             )}
 
@@ -166,10 +243,10 @@ export default function DashboardPage() {
                   href="/supplier/offers"
                 />
 
-                <DashboardActionCard
-                  title="New Offer"
-                  desc="Create a new offer"
-                  onClick={() => setOpenNewOffer(true)}
+                <DashboardCard
+                  title="Product categories"
+                  desc="List of product categories"
+                  href="/supplier/productCategories"
                 />
               </>
             )}

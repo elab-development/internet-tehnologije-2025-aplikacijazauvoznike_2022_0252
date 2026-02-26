@@ -18,3 +18,23 @@ export async function GET() {
 
   return Response.json(data);
 }
+
+export async function POST(req: Request) {
+  const body = await req.json();
+
+  if (!body.name || !body.name.trim()) {
+    return Response.json(
+      { error: "Name is required" },
+      { status: 400 }
+    );
+  }
+
+  const [category] = await db
+    .insert(productCategories)
+    .values({
+      name: body.name.trim(),
+    })
+    .returning();
+
+  return Response.json(category);
+}

@@ -44,10 +44,12 @@ export default function Sidebar() {
       ? [
           { href: "/dashboard", label: "Dashboard" },
           { href: "/importer/offers", label: "Offers" },
+          { href: "/importer/containers", label: "Containers" }
         ]
       : [
           { href: "/dashboard", label: "Dashboard" },
           { href: "/supplier/offers", label: "My offers" },
+          { href: "/supplier/productCategories", label: "Product Categories" }
         ];
 
   const company = user.companyName?.trim() || null;

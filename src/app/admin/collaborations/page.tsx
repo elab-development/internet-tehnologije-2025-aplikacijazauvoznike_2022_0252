@@ -46,12 +46,12 @@ export default function AdminCollaborationsPage() {
         const data = await res.json().catch(() => ({}));
 
         if (!res.ok) {
-          throw new Error(data?.error || `Neuspešno (HTTP ${res.status})`);
+          throw new Error(data?.error || `Request failed (HTTP ${res.status})`);
         }
 
         if (!cancelled) setRows(Array.isArray(data) ? data : []);
       } catch (e: any) {
-        if (!cancelled) setError(e?.message ?? "Greška pri učitavanju.");
+        if (!cancelled) setError(e?.message ?? "Error while loading data.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -130,7 +130,7 @@ export default function AdminCollaborationsPage() {
               {error}
             </div>
           ) : rows.length === 0 ? (
-            <div className="text-sm text-gray-600">Nema saradnji.</div>
+            <div className="text-sm text-gray-600">No collaborations found.</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full border-separate border-spacing-y-2">

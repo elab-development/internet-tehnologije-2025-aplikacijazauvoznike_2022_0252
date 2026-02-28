@@ -73,13 +73,13 @@ export default function UpdateUserModal({ user, onClose, onSave }: Props) {
       };
 
       if (!payload.email) {
-        setError("Email je obavezan.");
+        setError("Email is required.");
         return;
       }
 
       await onSave(payload);
     } catch (err: any) {
-      setError(err?.message ?? "Neuspesno snimanje.");
+      setError(err?.message ?? "Save failed.");
     } finally {
       setSaving(false);
     }

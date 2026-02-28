@@ -50,14 +50,14 @@ export default function SupplierOffersPage() {
 
       setOffers((data ?? []) as SupplierOfferDto[]);
     } catch (e: any) {
-      setError(e?.message ?? "Greška pri učitavanju ponuda");
+      setError(e?.message ?? "Error while loading offers");
     } finally {
       setLoading(false);
     }
   }
 
   async function handleDelete(id: string) {
-    const ok = confirm("Da li sigurno želiš da obrišeš ovu ponudu?");
+    const ok = confirm("Are you sure you want to delete this offer?");
     if (!ok) return;
 
     const prev = offers;
@@ -77,7 +77,7 @@ export default function SupplierOffersPage() {
       }
     } catch (e: any) {
       setOffers(prev);
-      alert(e?.message ?? "Greška pri brisanju");
+      alert(e?.message ?? "Error while deleting");
     } finally {
       setDeletingId(null);
     }
@@ -180,7 +180,7 @@ export default function SupplierOffersPage() {
 
           {!loading && error && (
             <div className="mt-4 rounded-2xl bg-white p-5 shadow-sm">
-              <div className="text-red-700 font-medium">Greška</div>
+              <div className="text-red-700 font-medium">Error</div>
               <div className="mt-1 text-sm text-red-700">{error}</div>
             </div>
           )}

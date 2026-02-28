@@ -7,9 +7,6 @@ import { cookies } from "next/headers";
 import { AUTH_COOKIE, verifyAuthToken } from "@/lib/auth";
 
 export async function DELETE(req: Request) {
-  // =========================
-  // 1️⃣ AUTH
-  // =========================
   const cookieStore = await cookies();
   const token = cookieStore.get(AUTH_COOKIE)?.value;
 
@@ -23,9 +20,6 @@ export async function DELETE(req: Request) {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  // =========================
-  // 2️⃣ ID IZ URL-a
-  // =========================
   const url = new URL(req.url);
   const parts = url.pathname.split("/");
 
@@ -36,9 +30,7 @@ export async function DELETE(req: Request) {
     return Response.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  // =========================
-  // 3️⃣ PROVERA KONTEJNERA
-  // =========================
+
   const [container] = await db
     .select()
     .from(containers)
@@ -60,9 +52,6 @@ export async function DELETE(req: Request) {
     );
   }
 
-  // =========================
-  // 4️⃣ BRISANJE STAVKE
-  // =========================
   const result = await db
     .delete(containerOffers)
     .where(

@@ -66,7 +66,7 @@ export default function ImporterOffersPage() {
 
       setOffers((data ?? []) as ImporterOfferDto[]);
     } catch (e: any) {
-      setError(e?.message ?? "Greška pri učitavanju ponuda");
+      setError(e?.message ?? "Error while loading offers");
     } finally {
       setLoading(false);
     }
@@ -140,29 +140,29 @@ export default function ImporterOffersPage() {
   }, [filtered]);
 
   function toggleCompare(offer: ImporterOfferDto) {
-    setCompareOffers((prev) => {
-      const exists = prev.find((o) => o.id === offer.id);
+    const exists = compareOffers.find((o) => o.id === offer.id);
 
-      if (exists) {
-        const updated = prev.filter((o) => o.id !== offer.id);
-        if (updated.length === 0) setActiveCategory(null);
-        return updated;
-      }
+    if (exists) {
+      const updated = compareOffers.filter((o) => o.id !== offer.id);
+      setCompareOffers(updated);
+      if (updated.length === 0) setActiveCategory(null);
+      return;
+    }
 
-      if (prev.length >= 4) return prev;
+    if (compareOffers.length >= 4) return;
 
-      if (prev.length === 0) {
-        setActiveCategory(offer.categoryId);
-        return [offer];
-      }
+    if (compareOffers.length === 0) {
+      setActiveCategory(offer.categoryId);
+      setCompareOffers([offer]);
+      return;
+    }
 
-      if (offer.categoryId !== activeCategory) {
-        alert("You can compare only products from the same category.");
-        return prev;
-      }
+    if (offer.categoryId !== activeCategory) {
+      alert("You can compare only products from the same category.");
+      return;
+    }
 
-      return [...prev, offer];
-    });
+    setCompareOffers([...compareOffers, offer]);
   }
 
   function goToCompare() {
@@ -251,7 +251,7 @@ export default function ImporterOffersPage() {
 
           {!loading && error && (
             <div className="mt-4 rounded-2xl bg-white p-5 shadow-sm">
-              <div className="text-red-700 font-medium">Greška</div>
+              <div className="text-red-700 font-medium">Error</div>
               <div className="mt-1 text-sm text-red-700">{error}</div>
             </div>
           )}

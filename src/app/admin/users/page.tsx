@@ -19,7 +19,6 @@ export default function AdminUsersPage() {
 
     (async () => {
       try {
-        
         const meRes = await fetch("/api/auth/me", {
           credentials: "include",
           cache: "no-store",
@@ -31,7 +30,6 @@ export default function AdminUsersPage() {
           return;
         }
 
-       
         const res = await fetch("/api/admin/users", {
           credentials: "include",
           cache: "no-store",
@@ -71,10 +69,9 @@ export default function AdminUsersPage() {
     const payload = await res.json().catch(() => ({}));
 
     if (!res.ok) {
-      throw new Error(payload?.error ?? "Update nije uspeo");
+      throw new Error(payload?.error ?? "Update failed");
     }
 
-    
     setUsers((prev) => prev.map((u) => (u.id === userId ? payload : u)));
     setEditingUser(null);
   }
@@ -148,7 +145,7 @@ export default function AdminUsersPage() {
               {filteredUsers.length === 0 && (
                 <tr>
                   <td colSpan={6} className="py-6 text-center text-gray-500">
-                    Nema korisnika za izabrani filter.
+                    No users found for the selected filter.
                   </td>
                 </tr>
               )}

@@ -124,7 +124,6 @@ export default function ContainerDetailsPage() {
     if (id) load();
   }, [id]);
 
-  // ✅ TOTAL VALUE
   const totalContainerValue = useMemo(() => {
     if (!data) return 0;
 
@@ -133,7 +132,6 @@ export default function ContainerDetailsPage() {
     }, 0);
   }, [data]);
 
-  // ✅ TOTAL UNITS
   const totalUnits = useMemo(() => {
     if (!data) return 0;
 
@@ -142,7 +140,6 @@ export default function ContainerDetailsPage() {
     }, 0);
   }, [data]);
 
-  // ✅ DISTINCT PRODUCTS
   const distinctProducts = useMemo(() => {
     if (!data) return 0;
     return data.items.length;
@@ -164,7 +161,6 @@ export default function ContainerDetailsPage() {
     <main className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-4xl mx-auto space-y-6">
 
-        {/* HEADER */}
         <div className="bg-white rounded-2xl p-6 shadow-sm">
           <div className="flex items-start justify-between">
             <h1 className="text-2xl font-semibold text-black">
@@ -179,7 +175,6 @@ export default function ContainerDetailsPage() {
             </button>
           </div>
 
-          {/* VOLUME */}
           <div className="mt-4">
             <div
               className={`text-sm mb-2 ${
@@ -208,7 +203,6 @@ export default function ContainerDetailsPage() {
             </div>
           </div>
 
-          {/* SUMMARY */}
           <div className="mt-6 space-y-2 text-black">
             <div className="text-lg font-semibold">
               Total container value:{" "}
@@ -243,7 +237,6 @@ export default function ContainerDetailsPage() {
           )}
         </div>
 
-        {/* ITEMS */}
         <div className="space-y-4">
           {data.items.length === 0 && (
             <div className="bg-white rounded-2xl p-6 shadow-sm text-black">

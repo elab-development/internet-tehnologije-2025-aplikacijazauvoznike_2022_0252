@@ -1,6 +1,8 @@
 import { db } from "@/db";
 import { users } from "@/db/schema/users";
 import { and, eq, inArray } from "drizzle-orm";
+import { cookies } from "next/headers";
+import { AUTH_COOKIE, verifyAuthToken } from "@/lib/auth";
 
 type UpdateUserBody = {
   email?: string;
@@ -8,7 +10,6 @@ type UpdateUserBody = {
   country?: string | null;
   address?: string | null;
 
-  
   role?: unknown;
   passHash?: unknown;
   id?: unknown;
@@ -26,19 +27,30 @@ export async function PUT(
 ) {
   const { id } = await params;
 
-  
+  const cookieStore = await cookies();
+  const token = cookieStore.get(AUTH_COOKIE)?.value;
+
+  if (!token) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { role } = verifyAuthToken(token);
+
+  if (role !== "ADMIN") {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   if (!id || !isUuid(id)) {
-    return Response.json({ error: "Neispravan id" }, { status: 400 });
+    return Response.json({ error: "Invalid id" }, { status: 400 });
   }
 
   let body: UpdateUserBody;
   try {
     body = (await req.json()) as UpdateUserBody;
   } catch {
-    return Response.json({ error: "Neispravan JSON" }, { status: 400 });
+    return Response.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  
   const updateData: Partial<{
     email: string;
     companyName: string | null;
@@ -49,7 +61,7 @@ export async function PUT(
   if (typeof body.email === "string") {
     const email = body.email.trim();
     if (!email) {
-      return Response.json({ error: "Email je obavezan" }, { status: 400 });
+      return Response.json({ error: "Email is required" }, { status: 400 });
     }
     updateData.email = email;
   }
@@ -71,7 +83,7 @@ export async function PUT(
 
   if (Object.keys(updateData).length === 0) {
     return Response.json(
-      { error: "Nema validnih polja za update" },
+      { error: "No valid fields provided for update" },
       { status: 400 }
     );
   }
@@ -98,19 +110,22 @@ export async function PUT(
 
     if (updated.length === 0) {
       return Response.json(
-        { error: "Korisnik nije pronadjen (ili nije importer/supplier)" },
+        { error: "User not found (or not importer/supplier)" },
         { status: 404 }
       );
     }
 
     return Response.json(updated[0]);
   } catch (err: any) {
-    const msg = typeof err?.message === "string" ? err.message : "Greska";
+    const msg = typeof err?.message === "string" ? err.message : "Error";
 
-    if (msg.toLowerCase().includes("duplicate") || msg.toLowerCase().includes("unique")) {
-      return Response.json({ error: "Email je vec zauzet" }, { status: 409 });
+    if (
+      msg.toLowerCase().includes("duplicate") ||
+      msg.toLowerCase().includes("unique")
+    ) {
+      return Response.json({ error: "Email is already taken" }, { status: 409 });
     }
 
-    return Response.json({ error: "Neuspesan update" }, { status: 500 });
+    return Response.json({ error: "Update failed" }, { status: 500 });
   }
 }

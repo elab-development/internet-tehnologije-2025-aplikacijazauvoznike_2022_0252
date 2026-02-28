@@ -21,7 +21,6 @@ export async function GET(req: Request) {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  // 🔥 OVDE JE PRAVA ISPRAVKA
   const url = new URL(req.url);
   const containerId = url.pathname.split("/").pop();
 

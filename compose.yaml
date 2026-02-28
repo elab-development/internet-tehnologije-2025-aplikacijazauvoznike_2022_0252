@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/iteh
+
+  db:
+    image: postgres:17
+    container_name: importers-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: iteh
+    ports:
+      - "5432:5432"
+    volumes:
+      - importers_pgdata:/var/lib/postgresql/data
+
+volumes:
+  importers_pgdata:

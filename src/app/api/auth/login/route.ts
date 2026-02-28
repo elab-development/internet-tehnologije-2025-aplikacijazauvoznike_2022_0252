@@ -15,7 +15,7 @@ export async function POST(req: Request) {
 
   if (!email || !password) {
     return NextResponse.json(
-      { error: "Pogresan email ili lozinka" },
+      { error: "Invalid email or password" },
       { status: 401 }
     );
   }
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
 
   if (!u) {
     return NextResponse.json(
-      { error: "Pogresan email ili lozinka" },
+      { error: "Invalid email or password" },
       { status: 401 }
     );
   }
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
   const ok = await bcrypt.compare(password, u.passHash);
   if (!ok) {
     return NextResponse.json(
-      { error: "Pogresan email ili lozinka" },
+      { error: "Invalid email or password" },
       { status: 401 }
     );
   }

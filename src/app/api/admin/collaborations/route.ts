@@ -56,11 +56,9 @@ function isDuplicateCollabError(e: any): boolean {
   return msg.includes("duplicate key") || msg.includes("unique constraint");
 }
 
-
 export async function GET() {
   const admin = await requireAdmin();
   if (admin instanceof NextResponse) return admin;
-
 
   const importer = alias(users, "importer");
   const supplier = alias(users, "supplier");
@@ -86,7 +84,6 @@ export async function GET() {
   return NextResponse.json(data);
 }
 
-
 export async function POST(req: Request) {
   const admin = await requireAdmin();
   if (admin instanceof NextResponse) return admin;
@@ -97,18 +94,17 @@ export async function POST(req: Request) {
 
   if (!importerId || !supplierId) {
     return NextResponse.json(
-      { error: "Importer i supplier su obavezni." },
+      { error: "Importer and supplier are required." },
       { status: 400 }
     );
   }
 
   if (importerId === supplierId) {
     return NextResponse.json(
-      { error: "Importer i supplier ne mogu biti isti user." },
+      { error: "Importer and supplier cannot be the same user." },
       { status: 400 }
     );
   }
-
 
   const pair = await db
     .select({ id: users.id, role: users.role })
@@ -119,22 +115,22 @@ export async function POST(req: Request) {
   const supplier = pair.find((u) => u.id === supplierId);
 
   if (!importer) {
-    return NextResponse.json({ error: "Importer ne postoji." }, { status: 400 });
+    return NextResponse.json({ error: "Importer does not exist." }, { status: 400 });
   }
   if (!supplier) {
-    return NextResponse.json({ error: "Supplier ne postoji." }, { status: 400 });
+    return NextResponse.json({ error: "Supplier does not exist." }, { status: 400 });
   }
 
   if (importer.role !== "IMPORTER") {
     return NextResponse.json(
-      { error: "Izabrani korisnik nije importer." },
+      { error: "Selected user is not an importer." },
       { status: 400 }
     );
   }
 
   if (supplier.role !== "SUPPLIER") {
     return NextResponse.json(
-      { error: "Izabrani korisnik nije supplier." },
+      { error: "Selected user is not a supplier." },
       { status: 400 }
     );
   }
@@ -145,7 +141,7 @@ export async function POST(req: Request) {
   } catch (e: any) {
     if (isDuplicateCollabError(e)) {
       return NextResponse.json(
-        { error: "Već postoji saradnja između izabranog importera i supplier-a." },
+        { error: "Collaboration between selected importer and supplier already exists." },
         { status: 409 }
       );
     }
@@ -154,9 +150,8 @@ export async function POST(req: Request) {
     console.error("PG CODE:", getPgCode(e));
 
     return NextResponse.json(
-      { error: "Došlo je do greške na serveru." },
+      { error: "Internal server error." },
       { status: 500 }
     );
   }
 }
-

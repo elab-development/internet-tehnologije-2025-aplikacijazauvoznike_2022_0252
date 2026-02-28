@@ -9,7 +9,6 @@ type Body = {
   email: string;
   password: string;
   role: "IMPORTER" | "SUPPLIER";
-
   companyName: string;
   country: string;
   address: string;
@@ -20,7 +19,7 @@ export async function POST(req: Request) {
     (await req.json()) as Body;
 
   if (!email || !password || !role || !companyName || !country || !address) {
-    return NextResponse.json({ error: "Nedostaju podaci" }, { status: 400 });
+    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
   const existing = await db
@@ -29,7 +28,7 @@ export async function POST(req: Request) {
     .where(eq(users.email, email));
 
   if (existing.length) {
-    return NextResponse.json({ error: "Email već postoji" }, { status: 400 });
+    return NextResponse.json({ error: "Email already exists" }, { status: 400 });
   }
 
   const passHash = await bcrypt.hash(password, 10);
@@ -39,7 +38,7 @@ export async function POST(req: Request) {
     .values({
       email,
       passHash,
-      role, 
+      role,
       companyName,
       country,
       address,

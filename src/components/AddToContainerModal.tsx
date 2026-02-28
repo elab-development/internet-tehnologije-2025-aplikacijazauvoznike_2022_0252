@@ -29,7 +29,6 @@ export default function AddToContainerModal({
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
 
-  // 🔥 RESET STATE svaki put kad se modal otvori
   useEffect(() => {
     if (offer) {
       setSelectedContainerId("");

@@ -1,6 +1,8 @@
 import { db } from "@/db";
 import { users } from "@/db/schema/users";
 import { inArray, asc } from "drizzle-orm";
+import { cookies } from "next/headers";
+import { AUTH_COOKIE, verifyAuthToken } from "@/lib/auth";
 
 export interface AdminUserDto {
   id: string;
@@ -13,6 +15,18 @@ export interface AdminUserDto {
 }
 
 export async function GET() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(AUTH_COOKIE)?.value;
+
+  if (!token) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { role } = verifyAuthToken(token);
+
+  if (role !== "ADMIN") {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const data: AdminUserDto[] = await db
     .select({

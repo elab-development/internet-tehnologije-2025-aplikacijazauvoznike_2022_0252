@@ -49,9 +49,7 @@ export async function POST(req: Request) {
     );
   }
 
-  // =========================
-  // IZRAČUNAJ POPUNJENOST
-  // =========================
+ 
 
   const items = await db
     .select({
@@ -85,7 +83,6 @@ export async function POST(req: Request) {
   const percentage =
     maxVolume === 0 ? 0 : (usedVolume / maxVolume) * 100;
 
-  // 🔥 OVDE JE NOVA LOGIKA
   if (percentage < 50) {
     return Response.json(
       { error: "Container must be at least 50% filled to finalize." },

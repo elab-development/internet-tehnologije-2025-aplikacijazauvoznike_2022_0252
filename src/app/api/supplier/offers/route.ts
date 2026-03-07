@@ -5,6 +5,75 @@ import { cookies } from "next/headers";
 import { AUTH_COOKIE, verifyAuthToken } from "@/lib/auth"; 
 import { productCategories } from "@/db/schema/productCategories";
 
+/**
+ * @swagger
+ * /api/supplier/offers:
+ *   get:
+ *     summary: Get supplier product offers
+ *     description: Returns all product offers created by the authenticated supplier (for example iPhone 15, MacBook Air M2, Samsung Galaxy S24, LG OLED TV).
+ *     tags:
+ *       - Supplier Offers
+ *     responses:
+ *       200:
+ *         description: List of supplier product offers
+ *         content:
+ *           application/json:
+ *             example:
+ *               - id: "uuid"
+ *                 categoryId: "uuid"
+ *                 categoryName: "Phones"
+ *                 code: "IP15-128"
+ *                 name: "iPhone 15"
+ *                 description: "Apple iPhone 15, 128GB"
+ *                 imageUrl: "https://example.com/iphone15.jpg"
+ *                 price: "800.00"
+ *                 width: 7.1
+ *                 height: 14.7
+ *                 depth: 0.8
+ *                 createdAt: "2026-03-07T10:00:00Z"
+ *       401:
+ *         description: Unauthorized (missing authentication cookie)
+ *       403:
+ *         description: Forbidden (only SUPPLIER users can access their offers)
+ *       500:
+ *         description: Internal server error
+ *
+ *   post:
+ *     summary: Create product offer
+ *     description: Creates a new product offer for a supplier. Products can include items such as iPhone 15, MacBook Air M2, Samsung Galaxy S24, LG OLED TV, tablets, or accessories.
+ *     tags:
+ *       - Supplier Offers
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             categoryId: "uuid"
+ *             code: "IP15-128"
+ *             name: "iPhone 15"
+ *             description: "Apple iPhone 15, 128GB"
+ *             imageUrl: "https://example.com/iphone15.jpg"
+ *             price: "800.00"
+ *             width: 7.1
+ *             height: 14.7
+ *             depth: 0.8
+ *     responses:
+ *       201:
+ *         description: Product offer successfully created
+ *         content:
+ *           application/json:
+ *             example:
+ *               id: "uuid"
+ *               message: "Offer created"
+ *       400:
+ *         description: Missing required fields
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (only SUPPLIER users can create offers)
+ *       500:
+ *         description: Internal server error
+ */
 
 export async function GET() {
   const cookieStore = await cookies();

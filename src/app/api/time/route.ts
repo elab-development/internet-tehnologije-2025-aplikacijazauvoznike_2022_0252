@@ -1,6 +1,30 @@
 import { cookies } from "next/headers";
 import { AUTH_COOKIE, verifyAuthToken } from "@/lib/auth";
 
+/**
+ * @swagger
+ * /api/time:
+ *   get:
+ *     summary: Get current server and external time
+ *     description: Returns the current time from an external API (Europe/Belgrade timezone) and the current server timestamp. Used for synchronizing client time with server time.
+ *     tags:
+ *       - Time
+ *     responses:
+ *       200:
+ *         description: Current time successfully retrieved
+ *         content:
+ *           application/json:
+ *             example:
+ *               externalTime: 1710000000000
+ *               serverNow: 1710000000500
+ *       401:
+ *         description: Unauthorized (missing authentication cookie)
+ *       403:
+ *         description: Forbidden (invalid authentication token)
+ *       500:
+ *         description: Failed to fetch external time API or internal server error
+ */
+
 export async function GET() {
   try {
     const cookieStore = await cookies();

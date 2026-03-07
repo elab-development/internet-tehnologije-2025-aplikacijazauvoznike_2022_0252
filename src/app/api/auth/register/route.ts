@@ -14,6 +14,43 @@ type Body = {
   address: string;
 };
 
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: Register new user
+ *     description: Creates a new importer or supplier account and returns the created user. A JWT authentication cookie is set after successful registration.
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             email: "user@example.com"
+ *             password: "password123"
+ *             role: "IMPORTER"
+ *             companyName: "Example Company"
+ *             country: "Serbia"
+ *             address: "Main Street 10"
+ *     responses:
+ *       200:
+ *         description: User successfully registered
+ *         content:
+ *           application/json:
+ *             example:
+ *               id: "uuid"
+ *               email: "user@example.com"
+ *               role: "IMPORTER"
+ *               companyName: "Example Company"
+ *               country: "Serbia"
+ *               address: "Main Street 10"
+ *       400:
+ *         description: Missing required fields or email already exists
+ *       500:
+ *         description: Internal server error
+ */
+
 export async function POST(req: Request) {
   const { email, password, role, companyName, country, address } =
     (await req.json()) as Body;

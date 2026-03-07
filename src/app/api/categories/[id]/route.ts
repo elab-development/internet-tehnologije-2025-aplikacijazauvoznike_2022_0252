@@ -6,6 +6,38 @@ import { AUTH_COOKIE, verifyAuthToken } from "@/lib/auth";
 
 type Role = "ADMIN" | "IMPORTER" | "SUPPLIER";
 
+/**
+ * @swagger
+ * /api/categories/{id}:
+ *   delete:
+ *     summary: Delete product category
+ *     description: Deletes a product category such as Phones, Laptops, Tablets, Accessories, or Televisions. Only users with SUPPLIER role can perform this action.
+ *     tags:
+ *       - Product Categories
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Product category ID (for example category like "Phones" or "Laptops")
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Product category successfully deleted
+ *         content:
+ *           application/json:
+ *             example:
+ *               ok: true
+ *       401:
+ *         description: Unauthorized (missing authentication cookie)
+ *       403:
+ *         description: Forbidden (only SUPPLIER users can manage product categories)
+ *       404:
+ *         description: Product category not found (for example category "Phones" does not exist)
+ *       500:
+ *         description: Internal server error
+ */
+
 export async function DELETE(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }

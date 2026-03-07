@@ -10,6 +10,54 @@ import { alias } from "drizzle-orm/pg-core";
 import { cookies } from "next/headers";
 import { AUTH_COOKIE, verifyAuthToken } from "@/lib/auth";
 
+/**
+ * @swagger
+ * /api/importer/offers/compare:
+ *   get:
+ *     summary: Compare product offers
+ *     description: Returns detailed information about multiple product offers (for example iPhone 15, Samsung Galaxy S24, MacBook Air M2) so that an importer can compare them. Only offers from suppliers that have collaboration with the importer are returned.
+ *     tags:
+ *       - Importer Offers
+ *     parameters:
+ *       - name: ids
+ *         in: query
+ *         required: true
+ *         description: Comma-separated list of product offer IDs (minimum 2, maximum 4)
+ *         schema:
+ *           type: string
+ *           example: "uuid1,uuid2,uuid3"
+ *     responses:
+ *       200:
+ *         description: Product offers successfully retrieved for comparison
+ *         content:
+ *           application/json:
+ *             example:
+ *               - id: "uuid"
+ *                 categoryId: "uuid"
+ *                 categoryName: "Phones"
+ *                 code: "IP15-128"
+ *                 name: "iPhone 15"
+ *                 description: "Apple iPhone 15, 128GB"
+ *                 imageUrl: "https://example.com/iphone15.jpg"
+ *                 price: "800.00"
+ *                 width: 7.1
+ *                 height: 14.7
+ *                 depth: 0.8
+ *                 supplierId: "uuid"
+ *                 supplierEmail: "supplier@example.com"
+ *                 supplierCompanyName: "Adriatic Tech DOO"
+ *       400:
+ *         description: Invalid number of product IDs (must be between 2 and 4)
+ *       401:
+ *         description: Unauthorized (missing authentication cookie)
+ *       403:
+ *         description: Forbidden (only IMPORTER users can compare offers)
+ *       404:
+ *         description: No matching offers found
+ *       500:
+ *         description: Internal server error
+ */
+
 export async function GET(req: Request) {
   try {
     const cookieStore = await cookies();

@@ -9,6 +9,66 @@ export type CategoryDto = {
   name: string;
 };
 
+/**
+ * @swagger
+ * /api/categories:
+ *   get:
+ *     summary: Get product categories
+ *     description: Returns a list of available product categories such as Phones, Laptops, Tablets, Accessories, and Televisions. Only users with SUPPLIER role can access this endpoint.
+ *     tags:
+ *       - Product Categories
+ *     responses:
+ *       200:
+ *         description: List of product categories
+ *         content:
+ *           application/json:
+ *             example:
+ *               - id: "uuid"
+ *                 name: "Phones"
+ *               - id: "uuid"
+ *                 name: "Laptops"
+ *               - id: "uuid"
+ *                 name: "Tablets"
+ *               - id: "uuid"
+ *                 name: "Accessories"
+ *       401:
+ *         description: Unauthorized (missing authentication cookie)
+ *       403:
+ *         description: Forbidden (only SUPPLIER users can access categories)
+ *       500:
+ *         description: Internal server error
+ *
+ *   post:
+ *     summary: Create product category
+ *     description: Creates a new product category for supplier products (for example Phones, Laptops, Tablets, Accessories, or Televisions).
+ *     tags:
+ *       - Product Categories
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             name: "Televisions"
+ *     responses:
+ *       201:
+ *         description: Product category successfully created
+ *         content:
+ *           application/json:
+ *             example:
+ *               id: "uuid"
+ *               name: "Televisions"
+ *       400:
+ *         description: Category name is required
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (only SUPPLIER users can create categories)
+ *       409:
+ *         description: Category already exists
+ *       500:
+ *         description: Internal server error
+ */
+
 export async function GET() {
   const cookieStore = await cookies();
   const token = cookieStore.get(AUTH_COOKIE)?.value;

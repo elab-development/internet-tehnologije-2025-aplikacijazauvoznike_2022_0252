@@ -7,6 +7,40 @@ import { eq, and } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { AUTH_COOKIE, verifyAuthToken } from "@/lib/auth";
 
+/**
+ * @swagger
+ * /api/importer/containers/{id}/finalize:
+ *   post:
+ *     summary: Finalize container
+ *     description: Finalizes an importer container after products have been added. The container must be at least 50% filled before it can be finalized. Only users with IMPORTER role can perform this action.
+ *     tags:
+ *       - Containers
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Container ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Container successfully finalized
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *       400:
+ *         description: Container is not sufficiently filled or already finalized
+ *       401:
+ *         description: Unauthorized (missing authentication cookie)
+ *       403:
+ *         description: Forbidden (only IMPORTER users can finalize containers)
+ *       404:
+ *         description: Container not found
+ *       500:
+ *         description: Internal server error
+ */
+
 export async function POST(req: Request) {
   const cookieStore = await cookies();
   const token = cookieStore.get(AUTH_COOKIE)?.value;

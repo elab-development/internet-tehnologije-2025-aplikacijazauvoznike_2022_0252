@@ -14,6 +14,42 @@ export interface AdminUserDto {
   createdAt: Date;
 }
 
+/**
+ * @swagger
+ * /api/admin/users:
+ *   get:
+ *     summary: Get users
+ *     description: Returns a list of importer and supplier users. Only ADMIN users can access this endpoint.
+ *     tags:
+ *       - Users
+ *     responses:
+ *       200:
+ *         description: List of users
+ *         content:
+ *           application/json:
+ *             example:
+ *               - id: "uuid"
+ *                 email: "importer@example.com"
+ *                 role: "IMPORTER"
+ *                 companyName: "Importer Company"
+ *                 country: "Serbia"
+ *                 address: "Main Street 10"
+ *                 createdAt: "2026-03-07T10:00:00Z"
+ *               - id: "uuid"
+ *                 email: "supplier@example.com"
+ *                 role: "SUPPLIER"
+ *                 companyName: "Supplier Company"
+ *                 country: "Germany"
+ *                 address: "Business Street 5"
+ *                 createdAt: "2026-03-07T11:00:00Z"
+ *       401:
+ *         description: Unauthorized (missing or invalid auth token)
+ *       403:
+ *         description: Forbidden (user is not ADMIN)
+ *       500:
+ *         description: Internal server error
+ */
+
 export async function GET() {
   const cookieStore = await cookies();
   const token = cookieStore.get(AUTH_COOKIE)?.value;

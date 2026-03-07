@@ -10,6 +10,39 @@ type Body = {
   password: string;
 };
 
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: User login
+ *     description: Authenticates a user with email and password and returns user information. A JWT authentication cookie is set if login is successful.
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             email: "user@example.com"
+ *             password: "password123"
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             example:
+ *               id: "uuid"
+ *               email: "user@example.com"
+ *               role: "IMPORTER"
+ *               companyName: "Example Company"
+ *               country: "Serbia"
+ *               address: "Main Street 10"
+ *       401:
+ *         description: Invalid email or password
+ *       500:
+ *         description: Internal server error
+ */
+
 export async function POST(req: Request) {
   const { email, password } = (await req.json()) as Body;
 

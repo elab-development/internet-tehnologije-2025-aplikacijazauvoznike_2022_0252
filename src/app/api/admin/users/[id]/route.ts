@@ -21,6 +21,60 @@ function isUuid(v: string) {
   );
 }
 
+/**
+ * @swagger
+ * /api/admin/users/{id}:
+ *   put:
+ *     summary: Update user
+ *     description: Updates importer or supplier user information. Only ADMIN users can perform this action.
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: User ID (UUID)
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             email: "user@example.com"
+ *             companyName: "Example Company"
+ *             country: "Serbia"
+ *             address: "Main Street 10"
+ *     responses:
+ *       200:
+ *         description: User successfully updated
+ *         content:
+ *           application/json:
+ *             example:
+ *               id: "uuid"
+ *               email: "user@example.com"
+ *               role: "IMPORTER"
+ *               companyName: "Example Company"
+ *               country: "Serbia"
+ *               address: "Main Street 10"
+ *               createdAt: "2026-03-07T10:00:00Z"
+ *       400:
+ *         description: Invalid request data
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (user is not ADMIN)
+ *       404:
+ *         description: User not found
+ *       409:
+ *         description: Email already taken
+ *       500:
+ *         description: Internal server error
+ */
+
+
+
 export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string }> }

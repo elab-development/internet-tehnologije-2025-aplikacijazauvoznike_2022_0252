@@ -8,6 +8,41 @@ import { eq, and } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { AUTH_COOKIE, verifyAuthToken } from "@/lib/auth";
 
+/**
+ * @swagger
+ * /api/containerItems:
+ *   post:
+ *     summary: Add product offer to container
+ *     description: Adds a supplier product offer (for example iPhone 15, MacBook Air, Samsung Galaxy S24, LG OLED TV) into an importer container. Only users with IMPORTER role can perform this action. The system checks container capacity before adding products.
+ *     tags:
+ *       - Container Items
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             containerId: "uuid"
+ *             offerId: "uuid"
+ *             quantity: 10
+ *     responses:
+ *       200:
+ *         description: Product successfully added to container
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *       400:
+ *         description: Invalid input or not enough space in container
+ *       401:
+ *         description: Unauthorized (missing authentication cookie)
+ *       403:
+ *         description: Forbidden (only IMPORTER users can add items to containers)
+ *       404:
+ *         description: Container or product offer not found
+ *       500:
+ *         description: Internal server error
+ */
+
 export async function POST(req: Request) {
 
   const cookieStore = await cookies();
